@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="mindello_manager",
-    version="0.1.1",
+    version="0.1.2",
     description="Scanner e autenticador de dispositivos Matter FALL-R1 na rede local.",
     author="Mindêllo Casas Inteligentes",
     author_email="lucas@mindello.com.br",
