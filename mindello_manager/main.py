@@ -7,7 +7,7 @@ from scapy.layers.l2 import Ether, ARP
 import os
 import sys
 import platform
-from matterlistener import MatterListener
+from .matterlistener import MatterListener
 
 def main():
     # Verifica se está rodando como root/admin de forma agnóstica
