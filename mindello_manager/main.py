@@ -13,7 +13,7 @@ import sys
 from colorlog import ColoredFormatter
 from zeroconf import ServiceBrowser, Zeroconf
 
-from .matterlistener import MatterListener
+from mindello_manager.matterlistener import MatterListener
 
 _LOGGER = logging.getLogger("main")
 
@@ -39,6 +39,8 @@ def main() -> None:
 
         except OSError:
             is_admin = False
+
+        if not is_admin:
             _LOGGER.warning(
                 "Este script precisa ser executado como administrador."
                 " Tentando reiniciar com privilégios...",
@@ -54,10 +56,8 @@ def main() -> None:
                     None,
                     1,
                 )
+                sys.exit(0)
             except Exception:
-                _LOGGER.exception(
-                    "Falha ao tentar obter privilégios de administrador. Saindo...",
-                )
                 _LOGGER.exception(
                     "Falha ao tentar obter privilégios de administrador. Saindo...",
                 )
@@ -72,6 +72,7 @@ def main() -> None:
             )
             try:
                 os.execvp("sudo", ["sudo", sys.executable, *sys.argv])  # noqa: S606, S607
+                sys.exit(0)
             except Exception:
                 _LOGGER.exception(
                     "Falha ao tentar obter privilégios de root. Saindo...",
