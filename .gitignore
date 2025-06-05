@@ -47,9 +47,6 @@ coverage.xml
 # pyenv
 .python-version
 
-# VS Code
-.vscode/
-
 # mypy
 .mypy_cache/
 .dmypy.json

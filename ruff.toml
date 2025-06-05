@@ -4,5 +4,10 @@ lint.select = ["ALL"]
 
 lint.preview = false
 
+[lint.per-file-ignores]
+"tests/*" = [
+    "S101",     # Use of `assert` detected
+]
+
 [lint.mccabe]
 max-complexity = 18

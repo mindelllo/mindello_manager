@@ -62,69 +62,72 @@ class MatterListener(ServiceListener):
 
         """
         info = zc.get_service_info(type_, name)
-        if info:
+        if info is None:
+            _LOGGER.warning("Informação do serviço %s não encontrada", name)
+            return
+
+        try:
+            addresses = info.parsed_addresses()
+        except (AttributeError, ValueError):
+            addresses = []
+        address = addresses[0] if addresses else "N/A"
+
+        mac_address: str = "N/A"
+        sn: str = "N/A"
+        if address != "N/A":
             try:
-                addresses = info.parsed_addresses()
-            except (AttributeError, ValueError):
-                addresses = []
-            address = addresses[0] if addresses else "N/A"
-
-            mac_address: str = "N/A"
-            sn: str = "N/A"
-            if address != "N/A":
-                try:
-                    conf.verb = 0
-                    ans, _ = srp(
-                        Ether(dst="ff:ff:ff:ff:ff:ff") / ARP(pdst=address),
-                        timeout=2,
-                        retry=1,
-                    )
-                    for _, rcv in ans:
-                        mac_address = rcv.sprintf("%Ether.src%")
-                        break
-                except Scapy_Exception as e:
-                    _LOGGER.warning("Erro ao obter MAC address para %s: %s", address, e)
-
-            http_on_80 = False
-            http_auth_ok = False
-            http_status = 0
-            if (
-                address != "N/A"
-                and mac_address != "N/A"
-                and len(mac_address.split(":")) == 6  # noqa: PLR2004
-            ):
-                try:
-                    mac_parts = mac_address.split(":")
-                    last4 = "".join([p.upper() for p in mac_parts[2:]])
-                    sn = f"FALLR1-{last4}"
-                    url = f"http://{address}:80/"
-                    response = requests.get(
-                        url,
-                        auth=HTTPBasicAuth("admin", sn),
-                        timeout=2,
-                    )
-                    if response.status_code == requests.codes["ok"]:
-                        http_auth_ok = True
-
-                except requests.RequestException:
-                    http_on_80 = False
-            device: dict[str, str | bool | int] = {
-                "name": name,
-                "address": address,
-                "sn": sn,
-                "port": getattr(info, "port", "N/A"),
-                "mac_address": mac_address,
-                "http_on_80": http_on_80,
-                "http_auth_ok": http_auth_ok,
-                "http_status": http_status,
-            }
-
-            if http_auth_ok and not any(
-                d["mac_address"] == mac_address for d in self.devices
-            ):
-                self.devices.append(device)
-                _LOGGER.info(
-                    "FALL-R1 encontrado: http://%s | SN: %s",
-                    device["address"],
-                    device["sn"],
+                conf.verb = 0
+                ans, _ = srp(
+                    Ether(dst="ff:ff:ff:ff:ff:ff") / ARP(pdst=address),
+                    timeout=2,
+                    retry=1,
                 )
+                for _, rcv in ans:
+                    mac_address = rcv.sprintf("%Ether.src%")
+                    break
+            except Scapy_Exception as e:
+                _LOGGER.warning("Erro ao obter MAC address para %s: %s", address, e)
+
+        http_on_80 = False
+        http_auth_ok = False
+        http_status = 0
+        if (
+            address != "N/A"
+            and mac_address != "N/A"
+            and len(mac_address.split(":")) == 6  # noqa: PLR2004
+        ):
+            try:
+                mac_parts = mac_address.split(":")
+                last4 = "".join([p.upper() for p in mac_parts[2:]])
+                sn = f"FALLR1-{last4}"
+                url = f"http://{address}:80/"
+                response = requests.get(
+                    url,
+                    auth=HTTPBasicAuth("admin", sn),
+                    timeout=2,
+                )
+                if response.status_code == requests.codes["ok"]:
+                    http_auth_ok = True
+
+            except requests.RequestException:
+                http_on_80 = False
+        device: dict[str, str | bool | int] = {
+            "name": name,
+            "address": address,
+            "sn": sn,
+            "port": getattr(info, "port", "N/A"),
+            "mac_address": mac_address,
+            "http_on_80": http_on_80,
+            "http_auth_ok": http_auth_ok,
+            "http_status": http_status,
+        }
+
+        if http_auth_ok and not any(
+            d["mac_address"] == mac_address for d in self.devices
+        ):
+            self.devices.append(device)
+            _LOGGER.info(
+                "FALL-R1 encontrado: http://%s | SN: %s",
+                device["address"],
+                device["sn"],
+            )
