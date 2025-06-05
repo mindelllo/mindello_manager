@@ -36,6 +36,7 @@ def main() -> None:
             import ctypes
 
             is_admin = ctypes.windll.shell32.IsUserAnAdmin() != 0  # type: ignore  # noqa: PGH003
+
         except OSError:
             is_admin = False
             _LOGGER.warning(
@@ -57,8 +58,12 @@ def main() -> None:
                 _LOGGER.exception(
                     "Falha ao tentar obter privilégios de administrador. Saindo...",
                 )
+                _LOGGER.exception(
+                    "Falha ao tentar obter privilégios de administrador. Saindo...",
+                )
             sys.exit(1)
     else:
+        is_admin = os.geteuid() == 0
         is_admin = os.geteuid() == 0
         if not is_admin:
             _LOGGER.warning(
@@ -77,6 +82,7 @@ def main() -> None:
     listener = MatterListener()
     # O tipo de serviço padrão para Matter é _matter._tcp.local.
     ServiceBrowser(zeroconf, "_matter._tcp.local.", listener)
+
     try:
         input("Pressione Enter para encerrar a busca...\n")
     except KeyboardInterrupt:
