@@ -41,7 +41,6 @@ class MatterListener(ServiceListener):
             name (str): The service name.
 
         """
-        # No action needed for removal in this implementation.
 
     def update_service(self, zc: Zeroconf, type_: str, name: str) -> None:
         """Handle update of a Zeroconf service (not implemented).
@@ -52,7 +51,6 @@ class MatterListener(ServiceListener):
             name (str): The service name.
 
         """
-        # No action needed for update in this implementation.
 
     def add_service(self, zc: Zeroconf, type_: str, name: str) -> None:
         """Handle addition of a Zeroconf service and attempt to identify device.
@@ -70,12 +68,12 @@ class MatterListener(ServiceListener):
             except (AttributeError, ValueError):
                 addresses = []
             address = addresses[0] if addresses else "N/A"
-            # Captura o MAC address usando scapy
+
             mac_address: str = "N/A"
             sn: str = "N/A"
             if address != "N/A":
                 try:
-                    conf.verb = 0  # Silencia a saída do scapy
+                    conf.verb = 0
                     ans, _ = srp(
                         Ether(dst="ff:ff:ff:ff:ff:ff") / ARP(pdst=address),
                         timeout=2,
@@ -86,7 +84,7 @@ class MatterListener(ServiceListener):
                         break
                 except Scapy_Exception as e:
                     _LOGGER.warning("Erro ao obter MAC address para %s: %s", address, e)
-            # Verifica se há um servidor HTTP na porta 80 e tenta autenticar
+
             http_on_80 = False
             http_auth_ok = False
             http_status = 0
@@ -96,13 +94,14 @@ class MatterListener(ServiceListener):
                 and len(mac_address.split(":")) == 6  # noqa: PLR2004
             ):
                 try:
-                    # Gera a senha: FALLR1-XXXXXXXX (XXXXXXXX = 4 últimos octetos do MAC, sem ':', maiúsculo)  # noqa: E501
                     mac_parts = mac_address.split(":")
                     last4 = "".join([p.upper() for p in mac_parts[2:]])
                     sn = f"FALLR1-{last4}"
                     url = f"http://{address}:80/"
                     response = requests.get(
-                        url, auth=HTTPBasicAuth("admin", sn), timeout=2,
+                        url,
+                        auth=HTTPBasicAuth("admin", sn),
+                        timeout=2,
                     )
                     if response.status_code == requests.codes["ok"]:
                         http_auth_ok = True

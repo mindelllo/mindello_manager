@@ -21,6 +21,7 @@ LOG_FORMAT = (
     "%(asctime)s.%(msecs)03d %(levelname)s (%(threadName)s) [%(name)s] %(message)s"
 )
 
+
 def main() -> None:
     """Detect and list Matter devices on the local network.
 
@@ -35,6 +36,7 @@ def main() -> None:
             import ctypes
 
             is_admin = ctypes.windll.shell32.IsUserAnAdmin() != 0  # type: ignore  # noqa: PGH003
+
         except OSError:
             is_admin = False
             _LOGGER.warning(
@@ -44,15 +46,24 @@ def main() -> None:
             try:
                 # Reinvoca o script com privilégios de admin no Windows
                 params = " ".join([f'"{arg}"' for arg in sys.argv])
-                ctypes.windll.shell32.ShellExecuteW( # type: ignore  # noqa: PGH003
-                    None, "runas", sys.executable, params, None, 1
+                ctypes.windll.shell32.ShellExecuteW(  # type: ignore  # noqa: PGH003
+                    None,
+                    "runas",
+                    sys.executable,
+                    params,
+                    None,
+                    1,
                 )
             except Exception:
                 _LOGGER.exception(
                     "Falha ao tentar obter privilégios de administrador. Saindo...",
                 )
+                _LOGGER.exception(
+                    "Falha ao tentar obter privilégios de administrador. Saindo...",
+                )
             sys.exit(1)
     else:
+        is_admin = os.geteuid() == 0
         is_admin = os.geteuid() == 0
         if not is_admin:
             _LOGGER.warning(
@@ -71,12 +82,14 @@ def main() -> None:
     listener = MatterListener()
     # O tipo de serviço padrão para Matter é _matter._tcp.local.
     ServiceBrowser(zeroconf, "_matter._tcp.local.", listener)
+
     try:
         input("Pressione Enter para encerrar a busca...\n")
     except KeyboardInterrupt:
         pass
     finally:
         _LOGGER.info("Busca finalizada.")
+
 
 if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)

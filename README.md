@@ -1,28 +1,32 @@
 # Mindello Manager: Matter Device Scanner
 
-Este projeto é um aplicativo Python que detecta e lista dispositivos Matter presentes na rede local.
+This project is a Python application that detects and lists Matter devices present on the local network.
 
-## Como funciona
-- Utiliza bibliotecas Python para descoberta de dispositivos Matter (ex: chip-tool, py-matter, zeroconf, etc).
-- Lista os dispositivos encontrados no terminal.
+## How it works
 
-## Como executar
-1. Crie e ative o ambiente virtual:
+- Uses Python libraries to discover Matter devices (e.g., chip-tool, py-matter, zeroconf, etc).
+- Lists the devices found in the terminal.
+
+## How to run
+
+1. Create and activate the virtual environment:
    ```bash
    python3 -m venv .venv
    source .venv/bin/activate
    pip install -r requirements.txt
    ```
-2. Execute o app:
+2. Run the app:
    ```bash
    python main.py
    ```
 
-## Dependências
+## Dependencies
+
 - Python 3.8+
-- py-matter (ou alternativa)
+- py-matter (or alternative)
 - zeroconf
 
-## Observações
-- Certifique-se de estar na mesma rede dos dispositivos Matter.
-- Caso não encontre dispositivos, verifique se eles estão ligados e acessíveis.
+## Notes
+
+- Make sure you are on the same network as the Matter devices.
+- If you do not find devices, check if they are turned on and accessible.
