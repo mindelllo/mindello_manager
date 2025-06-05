@@ -1,1 +1,1 @@
-# Torna o diretório mindello_manager um pacote Python
+"""Mindello Manager Package Initialization."""

@@ -1,3 +1,5 @@
+colorlog
 requests
 scapy
+types-requests
 zeroconf
